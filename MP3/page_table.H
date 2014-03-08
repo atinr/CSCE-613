@@ -16,7 +16,7 @@
 /*--------------------------------------------------------------------------*/
 /* DEFINES */
 /*--------------------------------------------------------------------------*/
-
+#define VM_REGISTER_SIZE 25
 /* -- (none) -- */
 
 /*--------------------------------------------------------------------------*/
@@ -51,6 +51,8 @@ private:
 
   /* DATA FOR CURRENT PAGE TABLE */
   unsigned long        * page_directory;     /* where is page directory located? */
+    
+    VMPool* register_dir[VM_REGISTER_SIZE];
 
 public:
   static const unsigned int PAGE_SIZE        = FramePool::FRAME_SIZE; /* in bytes */
@@ -85,7 +87,11 @@ public:
 
   void free_page(unsigned long _page_no);
   /* Release the frames associated with the page _page_no */
+    
 
+  unsigned long LogicalPD (unsigned long LogicalAddress);
+  unsigned long LogicalPT (unsigned long LogicalAddress);
+    
   void register_vmpool(VMPool *_pool);
 };
 

@@ -15,12 +15,12 @@ PageTable::PageTable () {
     unsigned int i;
     unsigned long * page_table_local;
 
-    page_directory = (unsigned long *)(((process_mem_pool->get_frame()) << 12));
+    page_directory = (unsigned long *)(((kernel_mem_pool->get_frame()) << 12));
 
     Console::putui((unsigned long)page_directory); 
     /* The first entry i.e. page_directory[0] corresponds to 0-4 MB - common shared area which is the first entry in page directory and other 1023 entries are loaded with address 0 [does not matter as flag is set as "not present"] */
     
-    page_directory[0] = (PageTable::process_mem_pool->get_frame());
+    page_directory[0] = (PageTable::kernel_mem_pool->get_frame());
 
     Console::putui(page_directory[0]);
 //u might need to shift frame address to first 20bits
@@ -33,7 +33,6 @@ PageTable::PageTable () {
     {
         page_directory[i] = 0 | 2;
     }
-    page_directory[1023]=(page_directory<<12) | 3;
 
     /*Loading up the first page table which covers the 0-4 MB which will be obtained via page directory entry [0] */
     
@@ -44,7 +43,12 @@ PageTable::PageTable () {
     }
    
     //page_directory |= 3;
-    //for(;;); 
+    //for(;;);
+    
+    for(i=0; i<VM_REGISTER_SIZE; i++)
+    {
+        register_dir[i] = NULL;
+    }
 }
 
 
@@ -67,8 +71,47 @@ void PageTable::load(){
 
     current_page_table = this;
     write_cr3((unsigned long)page_directory);
-
+    
 }
+
+unsigned long LogicalPT (unsigned long LogicalAddress)
+{
+    unsigned long ThousandTwentyThree = 1023; //1023 =  2^10-1
+    ThousandTwentyThree = ThousandTwentyThree << 22;
+    LogicalAddress = (LogicalAddress >> 12) << 2;
+    LogicalAddress = LogicalAddress | ThousandTwentyThree ;
+    
+    return LogicalAddress;
+}
+
+unsigned long LogicalPD (unsigned long LogicalAddress)
+{
+    unsigned long ThousandTwentyThree = 1048575: //1048575 = 2^20-1
+    ThousandTwentyThree = ThousandTwentyThree << 12;
+    LogicalAddress = (LogicalAddress >> 22) << 2;
+    LogicalAddress = LogicalAddress | ThousandTwentyThree ;
+    
+    return LogicalAddress;
+}
+
+
+void register_vmpool(VMPool *_pool){
+
+    unsigned int i=0;
+    
+    while((register_dir[i] != NULL) && (i<VM_REGISTER_SIZE))
+    {i++;
+    }
+    
+    if(i<VM_REGISTER_SIZE)
+        register_dir[i] = _pool;
+    else
+        Console::puts("VM Register Files in page Table Exceeded \n");
+    
+}
+
+
+
 
 void PageTable::handle_fault(REGS *_x){
 
@@ -94,7 +137,7 @@ void PageTable::handle_fault(REGS *_x){
       }
       else
       {
-         unsigned long t = PageTable::process_mem_pool->get_frame();
+         unsigned long t = PageTable::kernel_mem_pool->get_frame();
          pg_dir[address>>22] = t;
          pg_dir[address>>22] =( (pg_dir[address>>22]) << 12) | 3;
          page_table_local = (unsigned long *)(((pg_dir[address>>22])>>12)<<12);
