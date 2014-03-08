@@ -15,12 +15,12 @@ PageTable::PageTable () {
     unsigned int i;
     unsigned long * page_table_local;
 
-    page_directory = (unsigned long *)(((kernel_mem_pool->get_frame()) << 12));
+    page_directory = (unsigned long *)(((process_mem_pool->get_frame()) << 12));
 
     Console::putui((unsigned long)page_directory); 
     /* The first entry i.e. page_directory[0] corresponds to 0-4 MB - common shared area which is the first entry in page directory and other 1023 entries are loaded with address 0 [does not matter as flag is set as "not present"] */
     
-    page_directory[0] = (PageTable::kernel_mem_pool->get_frame());
+    page_directory[0] = (PageTable::process_mem_pool->get_frame());
 
     Console::putui(page_directory[0]);
 //u might need to shift frame address to first 20bits
@@ -33,6 +33,7 @@ PageTable::PageTable () {
     {
         page_directory[i] = 0 | 2;
     }
+    page_directory[1023]=(page_directory<<12) | 3;
 
     /*Loading up the first page table which covers the 0-4 MB which will be obtained via page directory entry [0] */
     
@@ -93,7 +94,7 @@ void PageTable::handle_fault(REGS *_x){
       }
       else
       {
-         unsigned long t = PageTable::kernel_mem_pool->get_frame();
+         unsigned long t = PageTable::process_mem_pool->get_frame();
          pg_dir[address>>22] = t;
          pg_dir[address>>22] =( (pg_dir[address>>22]) << 12) | 3;
          page_table_local = (unsigned long *)(((pg_dir[address>>22])>>12)<<12);
