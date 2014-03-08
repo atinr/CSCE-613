@@ -110,6 +110,16 @@ void register_vmpool(VMPool *_pool){
     
 }
 
+void free_page (unsigned long _page_no)
+{
+    unsigned long PhysicalFrameNo;
+    unsigned long * PageTableEntryPtr;
+    PageTableEntryPtr = (unsigned long *)LogicalPT (_page_no);
+    PhysicalFrameNo = (*PageTableEntryPtr) >> 12;
+    *PageTableEntryPtr = 0;
+    FramePool::release(PhysicalFrameNo);
+}
+
 
 
 
