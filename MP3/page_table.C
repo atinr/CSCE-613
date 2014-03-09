@@ -110,7 +110,7 @@ void register_vmpool(VMPool *_pool){
     
 }
 
-void free_page (unsigned long _page_no)
+void free_page(unsigned long _page_no)
 {
     unsigned long PhysicalFrameNo;
     unsigned long * PageTableEntryPtr;

@@ -18,6 +18,7 @@
 /* DEFINES */
 /*--------------------------------------------------------------------------*/
 
+#define PAGE_SIZE 4096
 /* -- (none) -- */
 
 /*--------------------------------------------------------------------------*/
@@ -41,7 +42,26 @@ class PageTable;
 class VMPool { /* Virtual Memory Pool */
 private:
    /* -- DEFINE YOUR VIRTUAL MEMORY POOL DATA STRUCTURE(s) HERE. */
+   unsigned long base_address;
+   unsigned long size;
+   FramePool *frame_pool;
+   PageTable *page_table;
+   
+   struct alloc_elem{
+      unsigned long address;
+      int size;
+      struct alloc_elem *next;
+   };
+ 
+   struct free_elem{
+      unsigned long address;
+      int size;
+      struct free_elem *next;
+   };
 
+   struct alloc_elem *alloc_list;
+   struct free_elem  *free_list;
+   
 public:
    VMPool(unsigned long _base_address,
           unsigned long _size,
