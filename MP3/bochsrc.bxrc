@@ -46,3 +46,7 @@ mouse: enabled=0
 
 
 clock: sync=realtime, time0=946681200   # Sat Jan  1 00:00:00 2000
+
+display_library: sdl
+
+#cpu: reset_on_triple_fault=0

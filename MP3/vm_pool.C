@@ -1,5 +1,6 @@
 
-
+#include "vm_pool.H"
+#include "page_table.H"
 //   char* page_bitmap;
 //   struct alloc_list{
 //      unsigned long address;
@@ -35,6 +36,8 @@ VMPool::VMPool(unsigned long _base_address,
      //Initializing the count
      alloc_list_count = 0;
      free_list_count = 1;
+
+     page_table->register(this);
 }
      
       
