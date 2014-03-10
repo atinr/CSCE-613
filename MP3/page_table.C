@@ -14,7 +14,7 @@ PageTable::PageTable () {
     unsigned long address =0;
     unsigned int i;
     unsigned long * page_table_local;
-
+    
     page_directory = (unsigned long *)(((process_mem_pool->get_frame()) << 12));
 
     Console::putui((unsigned long)page_directory); 
@@ -33,7 +33,7 @@ PageTable::PageTable () {
     {
         page_directory[i] = 0 | 2;
     }
-     page_directory[1023]=((unsigned long)page_directory<<12) | 3; 
+     page_directory[1023]=((unsigned long)page_directory) | 3; 
 
     /*Loading up the first page table which covers the 0-4 MB which will be obtained via page directory entry [0] */
     
@@ -46,7 +46,7 @@ PageTable::PageTable () {
     //page_directory |= 3;
     //for(;;);
     
-    for(i=0; i<VM_REGISTER_SIZE; i++)
+   for(i=0; i<VM_REGISTER_SIZE; i++)
     {
         register_dir[i] = NULL;
     }
@@ -77,21 +77,26 @@ void PageTable::load(){
 
 unsigned long LogicalPT (unsigned long LogicalAddress)
 {
-    unsigned long ThousandTwentyThree = 1023; //1023 =  2^10-1
+    unsigned long ThousandTwentyThree = 0x03FF; //1023 =  2^10-1
     ThousandTwentyThree = ThousandTwentyThree << 22;
+    //Console::putui(ThousandTwentyThree);
     LogicalAddress = (LogicalAddress >> 12) << 2;
+    //Console::putui(LogicalAddress);
     LogicalAddress = LogicalAddress | ThousandTwentyThree ;
+    //Console::putui(LogicalAddress);
     
     return LogicalAddress;
 }
 
 unsigned long LogicalPD (unsigned long LogicalAddress)
 {
-    unsigned long ThousandTwentyThree = 1048575: //1048575 = 2^20-1
+    unsigned long ThousandTwentyThree = 0xFFFFF; //1048575 = 2^20-1
     ThousandTwentyThree = ThousandTwentyThree << 12;
+    //Console::putui(ThousandTwentyThree);
     LogicalAddress = (LogicalAddress >> 22) << 2;
+    //Console::putui(LogicalAddress);
     LogicalAddress = LogicalAddress | ThousandTwentyThree ;
-    
+    //Console::putui(LogicalAddress);
     return LogicalAddress;
 }
 
@@ -123,7 +128,6 @@ void free_page(unsigned long _page_no)
 
 
 
-
 void PageTable::handle_fault(REGS *_x){
 
     //signed long *pg_dir = (unsigned long *)read_cr3();
@@ -139,8 +143,15 @@ void PageTable::handle_fault(REGS *_x){
     {
       address = read_cr2();
       //Console::puts("the above is the address\n");
+      //Console::putui(address);
       dir_addr = (unsigned long *)LogicalPD(address);
       page_addr = (unsigned long *)LogicalPT(address);
+      //Console::putui(LogicalPD(address));
+      //Console::putui((unsigned long)dir_addr);
+      //Console::putui(LogicalPT(address));
+      //Console::putui((unsigned long)page_addr);
+
+      //while(1){}
       if(*dir_addr & 1 == 1)
       {
          //page_table_local = (unsigned long *)(((pg_dir[address>>22])>>12)<<12);
@@ -179,7 +190,7 @@ void PageTable::handle_fault(REGS *_x){
          }
 
          *page_addr = PageTable::process_mem_pool->get_frame();
-         *page_addr =  (*page_addr) << 12) | 3;
+         *page_addr =  ((*page_addr) << 12) | 3;
 
       }
     }
