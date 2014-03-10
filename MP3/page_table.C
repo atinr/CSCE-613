@@ -15,12 +15,12 @@ PageTable::PageTable () {
     unsigned int i;
     unsigned long * page_table_local;
 
-    page_directory = (unsigned long *)(((kernel_mem_pool->get_frame()) << 12));
+    page_directory = (unsigned long *)(((process_mem_pool->get_frame()) << 12));
 
     Console::putui((unsigned long)page_directory); 
     /* The first entry i.e. page_directory[0] corresponds to 0-4 MB - common shared area which is the first entry in page directory and other 1023 entries are loaded with address 0 [does not matter as flag is set as "not present"] */
     
-    page_directory[0] = (PageTable::kernel_mem_pool->get_frame());
+    page_directory[0] = (PageTable::process_mem_pool->get_frame());
 
     Console::putui(page_directory[0]);
 //u might need to shift frame address to first 20bits
@@ -33,6 +33,7 @@ PageTable::PageTable () {
     {
         page_directory[i] = 0 | 2;
     }
+     page_directory[1023]=((unsigned long)page_directory<<12) | 3; 
 
     /*Loading up the first page table which covers the 0-4 MB which will be obtained via page directory entry [0] */
     
@@ -125,10 +126,11 @@ void free_page(unsigned long _page_no)
 
 void PageTable::handle_fault(REGS *_x){
 
-    unsigned long *pg_dir = (unsigned long *)read_cr3();
+    //signed long *pg_dir = (unsigned long *)read_cr3();
     unsigned int temp;
     unsigned long address;
-    unsigned long *page_table_local;
+    //unsigned long *page_table_local;
+    unsigned long *dir_addr, *page_addr, *temp_addr;
 
     temp = _x->err_code;
     temp &= 7;
@@ -137,18 +139,21 @@ void PageTable::handle_fault(REGS *_x){
     {
       address = read_cr2();
       //Console::puts("the above is the address\n");
-      if(pg_dir[address>>22] & 1 == 1)
+      dir_addr = (unsigned long *)LogicalPD(address);
+      page_addr = (unsigned long *)LogicalPT(address);
+      if(*dir_addr & 1 == 1)
       {
-         page_table_local = (unsigned long *)(((pg_dir[address>>22])>>12)<<12);
-         page_table_local[(address>>12) & 0x03FF] =  PageTable::process_mem_pool->get_frame();
-         page_table_local[(address>>12) & 0x03FF] =  ((page_table_local[(address>>12) & 0x03FF]) << 12) | 5;
-
+         //page_table_local = (unsigned long *)(((pg_dir[address>>22])>>12)<<12);
+         //page_table_local[(address>>12) & 0x03FF] =  PageTable::process_mem_pool->get_frame();
+         //page_table_local[(address>>12) & 0x03FF] =  ((page_table_local[(address>>12) & 0x03FF]) << 12) | 5;
+         *page_addr = PageTable::process_mem_pool->get_frame();
+         *page_addr = (*page_addr << 12) | 5;
        
       }
       else
       {
-         unsigned long t = PageTable::kernel_mem_pool->get_frame();
-         pg_dir[address>>22] = t;
+         unsigned long t = PageTable::process_mem_pool->get_frame();
+         /*pg_dir[address>>22] = t;
          pg_dir[address>>22] =( (pg_dir[address>>22]) << 12) | 3;
          page_table_local = (unsigned long *)(((pg_dir[address>>22])>>12)<<12);
       
@@ -160,7 +165,21 @@ void PageTable::handle_fault(REGS *_x){
          }
          
          page_table_local[(address>>12) & 0x03FF] =  PageTable::process_mem_pool->get_frame();
-         page_table_local[(address>>12) & 0x03FF] =  ((page_table_local[(address>>12) & 0x03FF]) << 12) | 3;
+         page_table_local[(address>>12) & 0x03FF] =  ((page_table_local[(address>>12) & 0x03FF]) << 12) | 3;*/
+         *dir_addr = t;
+	 *dir_addr =(( *dir_addr) << 12) | 3;
+
+         address = (address>>22)<<22;
+         for(int i=0; i<1024; i++)
+         {
+	    
+            temp_addr = (unsigned long *)LogicalPT(address);
+            *temp_addr = 4;
+	    address = ((address>>12)+1)<<12;
+         }
+
+         *page_addr = PageTable::process_mem_pool->get_frame();
+         *page_addr =  (*page_addr) << 12) | 3;
 
       }
     }
