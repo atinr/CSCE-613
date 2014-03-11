@@ -7,7 +7,7 @@ clean:
 	rm -f *.o
 
 start.o: start.asm gdt_low.asm idt_low.asm irq_low.asm
-	nasm -f aout -o start.o start.asm
+	nasm -f elf -o start.o start.asm
 
 utils.o: utils.C utils.H
 	$(CPP) $(CPP_OPTIONS) -c -o utils.o utils.C
@@ -48,7 +48,7 @@ simple_timer.o: simple_timer.C simple_timer.H
 # ==== MEMORY =====
 
 paging_low.o: paging_low.asm paging_low.H
-	nasm -f aout -o paging_low.o paging_low.asm
+	nasm -f elf -o paging_low.o paging_low.asm
 
 page_table.o: page_table.C page_table.H paging_low.H
 	$(CPP) $(CPP_OPTIONS) -c -o page_table.o page_table.C

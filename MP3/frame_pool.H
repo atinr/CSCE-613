@@ -39,6 +39,11 @@
 class FramePool {
 private:
      /* -- DEFINE YOUR FRAME POOL DATA STRUCTURE(s) HERE. */
+   const unsigned long KERNEL_MEMORY_INFO = 512*4096;//TODO: Set an address here
+
+   unsigned long base_frame_no, nframes, info_frame_no;
+   unsigned char *bitmap = (unsigned char *)KERNEL_MEMORY_INFO;
+   unsigned long bytes_count;
 
 public:
    static const unsigned int FRAME_SIZE = 4096;
