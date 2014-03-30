@@ -21,6 +21,7 @@
 
 #include "machine.H"
 #include "thread.H"
+#include "queue.H"
 
 /*--------------------------------------------------------------------------*/
 /* SCHEDULER
@@ -29,6 +30,8 @@
 class Scheduler {
 
    /* The scheduler may need private members... */
+
+   ReadyQueue Queue;
 
 public:
 

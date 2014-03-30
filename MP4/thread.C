@@ -185,6 +185,13 @@ Thread::Thread(Thread_Function _tf, char * _stack, unsigned int _stack_size) {
 
 }
 
+
+Thread::~Thread() {
+/* Releasing the stack memory initialized initially */
+
+   delete stack;
+}
+
 int Thread::ThreadId() {
     return thread_id;
 }
