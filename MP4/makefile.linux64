@@ -7,7 +7,7 @@ clean:
 	rm -f *.o
 
 start.o: start.asm gdt_low.asm idt_low.asm irq_low.asm
-	nasm -f aout -o start.o start.asm
+	nasm -f elf -o start.o start.asm
 
 utils.o: utils.C utils.H
 	$(CPP) $(CPP_OPTIONS) -c -o utils.o utils.C
@@ -56,11 +56,19 @@ mem_pool.o: mem_pool.C mem_pool.H
 	
 # ==== THREADS =====
 
-threads_low.o: threads_low.asm threads_low.h
-	nasm -f aout -o threads_low.o threads_low.asm
+threads_low.o: threads_low.asm threads_low.H
+	nasm -f elf -o threads_low.o threads_low.asm
 
-thread.o: thread.C thread.H threads_low.h
+thread.o: thread.C thread.H threads_low.H
 	$(CPP) $(CPP_OPTIONS) -c -o thread.o thread.C
+
+# ==== SCHEDULER ====
+
+Scheduler.o: Scheduler.H Scheduler.C
+	$(CPP) $(CPP_OPTIONS) -c -o Scheduler.o Scheduler.C
+
+queue_using_array.o: queue_using_array.H queue_using_array.C
+	$(CPP) $(CPP_OPTIONS) -c -o queue_using_array.o queue_using_array.C
 
 # ==== KERNEL MAIN FILE =====
 
@@ -68,8 +76,9 @@ kernel.o: kernel.C console.H gdt.H irq.H exceptions.H interrupts.H simple_timer.
 	$(CPP) $(CPP_OPTIONS) -c -o kernel.o kernel.C
 
 kernel.bin: start.o utils.o kernel.o assert.o console.o gdt.o idt.o irq.o machine.o exceptions.o interrupts.o \
-   simple_timer.o frame_pool.o mem_pool.o threads_low.o thread.o
-	ld -T linker.ld -o kernel.bin start.o utils.o kernel.o assert.o console.o gdt.o idt.o \
-   exceptions.o irq.o machine.o interrupts.o simple_timer.o frame_pool.o mem_pool.o threads_low.o thread.o
+   simple_timer.o frame_pool.o mem_pool.o threads_low.o thread.o Scheduler.o queue_using_array.o
+	ld -melf_i386 -T linker.ld -o kernel.bin start.o utils.o kernel.o assert.o console.o gdt.o idt.o \
+   exceptions.o irq.o machine.o interrupts.o simple_timer.o frame_pool.o mem_pool.o threads_low.o thread.o \
+   Scheduler.o queue_using_array.o
 	
 	

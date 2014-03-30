@@ -1,4 +1,4 @@
-#include "queue.H"
+#include "queue_using_array.H"
 
 /*Implementation of Queue for Thread Scheduler*/
 
@@ -38,7 +38,7 @@ void Queue::enqueue(Thread *th)
      list[tail] = th;
    }
    else
-     printf("\n ReadyQueue Full!!");
+     Console::puts("\n ReadyQueue Full!!");
 }
 
 
@@ -60,7 +60,7 @@ Thread* Queue::dequeue()
    }
    else
    {
-      printf("\nReadyQueue Empty!!");
+      Console::puts("\nReadyQueue Empty!!");
       return NULL;
    }
 }

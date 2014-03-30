@@ -1,5 +1,4 @@
 #include "Scheduler.H"
-#include "queue.H"
 
 /*Costructor*/
 Scheduler::Scheduler()
@@ -33,14 +32,14 @@ void Scheduler::resume(Thread * _thread)
      typically after thread creation. Depending on the
       implementation, this may not entail more than simply adding the 
       thread to the ready queue (see scheduler_resume). */
-void Scheduler::add(Thread * _thread);
+void Scheduler::add(Thread * _thread)
 {
    ReadyQueue.enqueue(_thread);
 }
   
  /* Remove the given thread from the scheduler in preparation for destruction
       of the thread. */
-void Scheduler::terminate(Thread * _thread);
+void Scheduler::terminate(Thread * _thread)
 {
    delete _thread;
 }
