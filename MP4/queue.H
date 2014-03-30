@@ -12,7 +12,6 @@ private:
 	struct list **Q;
 
 public:
-	void queue_init();
 	int isEmpty();
 	void enqueue(Thread *th);
 	Thread * dequeue();
