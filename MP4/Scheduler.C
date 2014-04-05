@@ -16,6 +16,11 @@ void Scheduler::yield()
    {
          Thread::dispatch_to(next);
    }
+   else
+   {
+      Console::puts("Error encountered!!");
+      for(;;);
+   }
 }
 
 

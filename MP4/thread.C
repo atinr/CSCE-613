@@ -37,12 +37,14 @@
 #include "thread.H"
 
 #include "threads_low.H"
-
+#include "Scheduler.H"
 /*--------------------------------------------------------------------------*/
 /* EXTERNS */
 /*--------------------------------------------------------------------------*/
 
 Thread * current_thread = 0;
+extern Scheduler * SYSTEM_SCHEDULER;
+
 /* Pointer to the currently running thread. This is used by the scheduler,
    for example. */
 
@@ -55,6 +57,11 @@ int Thread::nextFreePid;
 /* -------------------------------------------------------------------------*/
 /* LOCAL FUNCTIONS */
 /* -------------------------------------------------------------------------*/
+
+char* Thread::getStack()
+{
+   return stack;
+}
 
 /* -------------------------------------------------------------------------*/
 /* EXPLICIT STACK OPERATIONS */
@@ -73,8 +80,13 @@ static void thread_shutdown() {
        It terminates the thread by releasing memory and any other resources held by the thread. 
        This is a bit complicated because the thread termination interacts with the scheduler.
      */
-
-    //assert(FALSE);
+    //Console::puts("\n I am in thread");
+    //Console::putui((unsigned int)current_thread);
+    //delete (Thread::CurrentThread())->getStack();
+    Thread *t = current_thread;
+    SYSTEM_SCHEDULER->yield();    
+    SYSTEM_SCHEDULER->terminate(t);
+    assert(FALSE);
     /* Let's not worry about it for now. 
        This means that we should have non-terminating thread functions. 
     */
@@ -189,7 +201,7 @@ Thread::Thread(Thread_Function _tf, char * _stack, unsigned int _stack_size) {
 Thread::~Thread() {
 /* Releasing the stack memory initialized initially */
 
-   delete stack;
+//   delete stack;
 }
 
 int Thread::ThreadId() {
@@ -208,7 +220,9 @@ void Thread::dispatch_to(Thread * _thread) {
     /* The value of 'current_thread' is modified inside 'threads_low_switch_to()'. */
 
     threads_low_switch_to(_thread);
-
+    
+    //if (not (machine_interrupts_enabled()))
+    //  machine_enable_interrupts();
     /* The call does not return until after the thread is context-switched back in. */
 }
        

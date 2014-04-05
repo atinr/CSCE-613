@@ -21,8 +21,8 @@
 /* DEFINES */
 /*--------------------------------------------------------------------------*/
 
-/* -- (none) -- */
-
+class Scheduler;
+class Kernel;
 /*--------------------------------------------------------------------------*/
 /* INCLUDES */
 /*--------------------------------------------------------------------------*/
@@ -35,7 +35,6 @@
 
 /* -- THREAD FUNCTION (CALLED WHEN THREAD STARTS RUNNING) */
 typedef void (*Thread_Function)();
-
 /*--------------------------------------------------------------------------*/
 /* THREAD CONTROL BLOCK */
 /*--------------------------------------------------------------------------*/
@@ -76,6 +75,9 @@ public:
 
     int ThreadId();
     /* Returns the thread id of the thread. */
+
+    char* getStack();
+    /* return the stack pointer for the current thread */
 
     static void dispatch_to(Thread * _thread);
     /* This is the low-level dispatch function that invokes the context switch
