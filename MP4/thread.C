@@ -221,8 +221,8 @@ void Thread::dispatch_to(Thread * _thread) {
 
     threads_low_switch_to(_thread);
     
-    //if (not (machine_interrupts_enabled()))
-    //  machine_enable_interrupts();
+    if (not (machine_interrupts_enabled()))
+     machine_enable_interrupts();
     /* The call does not return until after the thread is context-switched back in. */
 }
        

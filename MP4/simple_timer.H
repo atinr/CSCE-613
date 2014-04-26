@@ -22,7 +22,7 @@
 /*--------------------------------------------------------------------------*/
 
 #include "exceptions.H"
-
+#include "Scheduler.H"
 /* Note: The register set data structure REGS is defined in "exceptions.H" */
 
 /*--------------------------------------------------------------------------*/

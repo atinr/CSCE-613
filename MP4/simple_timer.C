@@ -24,11 +24,16 @@
 #include "console.H"
 #include "interrupts.H"
 #include "simple_timer.H"
+#include "thread.H"
 
+BOOLEAN generated_by_slave_PIC(unsigned int int_no) {
+  return int_no > 7;
+}
 /*--------------------------------------------------------------------------*/
 /* VARIABLES */
 /*--------------------------------------------------------------------------*/
 
+extern Scheduler * SYSTEM_SCHEDULER;
 unsigned long SimpleTimer::seconds; 
 int           SimpleTimer::ticks;   /* ticks since last "seconds" update.    */
 
@@ -70,12 +75,30 @@ void SimpleTimer::handler(REGS *_r) {
     ticks++;
 
     /* Whenever a second is over, we update counter accordingly. */
-    if (ticks >= hz )
+    /*if (ticks >= hz )
     {
         seconds++;
         ticks = 0;
         Console::puts("One second has passed\n");
     }
+    */
+
+  unsigned int int_no = _r->int_no - 32;
+
+  if (generated_by_slave_PIC(int_no)) {
+       outportb(0xA0, 0x20);
+  }
+
+  // Send an EOI message to the master interrupt controller. 
+  outportb(0x20, 0x20);
+
+
+    if (ticks >= 5)
+    {
+        SYSTEM_SCHEDULER->resume(Thread::CurrentThread());
+        SYSTEM_SCHEDULER->yield();      
+    }
+  
 }
 
 

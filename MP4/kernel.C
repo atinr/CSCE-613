@@ -109,7 +109,6 @@ void pass_on_CPU(Thread * _to_thread) {
         /* We use a scheduler. Instead of dispatching to the next thread,
            we pre-empt the current thread by putting it onto the ready
            queue and yielding the CPU. */
-        Console::puts("Inside");
         SYSTEM_SCHEDULER->resume(Thread::CurrentThread());
         SYSTEM_SCHEDULER->yield();
 #endif
@@ -140,7 +139,10 @@ void fun1() {
         for (int i = 0; i < 10; i++) {
             Console::puts("FUN 1: TICK ["); Console::puti(i); Console::puts("]\n");
         }
-        pass_on_CPU(thread2);
+
+      if (j == 1)
+         for(;;);
+      pass_on_CPU(thread2);
     }
 }
 
@@ -258,7 +260,7 @@ int main() {
                  we enable interrupts correctly. If we forget to do it,
                  the timer "dies". */
 
-    SimpleTimer::init(100); /* timer ticks every 10ms. */
+    SimpleTimer::init(5); /* timer ticks every 10ms. */
     register_interrupt_handler(0, SimpleTimer::handler);
 
 
