@@ -3,7 +3,7 @@
 class freeList{
 
 private:
-	bool vector[Block_Count] = {false};
+	char vector[Block_Count/8];
 
 public:
 	freeList();
