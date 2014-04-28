@@ -20,7 +20,7 @@
 
 /* -- COMMENT/UNCOMMENT THE FOLLOWING LINE TO EXCLUDE/INCLUDE SCHEDULER CODE */
 
-//#define _USES_SCHEDULER_
+#define _USES_SCHEDULER_
 /* This macro is defined when we want to force the code below to use 
    a scheduler.
    Otherwise, no scheduler is used, and the threads pass control to each 
@@ -60,11 +60,12 @@
 #include "thread.H"         /* THREAD MANAGEMENT */
 
 #ifdef _USES_SCHEDULER_
-#include "scheduler.H"
+#include "Scheduler.H"
 #endif
 
 #ifdef _USES_DISK_
 #include "simple_disk.H"
+#include "blocking_disk.H"
 #endif
 
 #ifdef _USES_FILESYSTEM_
@@ -100,7 +101,7 @@ Scheduler * SYSTEM_SCHEDULER;
 
 /* -- A POINTER TO THE SYSTEM DISK */
 SimpleDisk * SYSTEM_DISK;
-
+BlockingDisk * SYSTEM_BLOCK_DISK;
 #define SYSTEM_DISK_SIZE 10485760
 
 #endif
@@ -168,6 +169,14 @@ void exercise_file_system(FileSystem * _file_system, SimpleDisk * _simple_disk) 
 /* A FEW THREADS (pointer to TCB's and thread functions) */
 /*--------------------------------------------------------------------------*/
 
+void delay(int nsec)
+{
+   for(int i = 0; i < nsec; ++i)
+      for(int j = 0 ; j< 2*1000000; ++j)
+      {}
+}
+
+
 Thread * thread1;
 Thread * thread2;
 Thread * thread3;
@@ -211,8 +220,9 @@ void fun2() {
        /* -- Read */
        Console::puts("Reading a block from disk...\n");
        /* UNCOMMENT THE FOLLOWING LINE IN FINAL VERSION. */
-       SYSTEM_DISK->read(read_block, buf);
+       SYSTEM_BLOCK_DISK->read(read_block, buf);
 
+       delay(10);
        /* -- Display */
        int i;
        for (i = 0; i < 512; i++) {
@@ -226,9 +236,9 @@ void fun2() {
 
        Console::puts("Writing a block to disk...\n");
        /* UNCOMMENT THE FOLLOWING LINE IN FINAL VERSION. */
-       SYSTEM_DISK->write(write_block, buf); 
+       SYSTEM_BLOCK_DISK->write(write_block, buf); 
 #endif
-
+       delay(10);
        /* -- Move to next block */
        write_block = read_block;
        read_block  = (read_block + 1) % 10;
@@ -379,6 +389,9 @@ int main() {
 
     SimpleDisk system_disk = SimpleDisk(MASTER, SYSTEM_DISK_SIZE);
     SYSTEM_DISK = &system_disk;
+
+    BlockingDisk system_block_disk = BlockingDisk(MASTER, SYSTEM_DISK_SIZE);
+    SYSTEM_BLOCK_DISK = &system_block_disk;
 
 #endif
 

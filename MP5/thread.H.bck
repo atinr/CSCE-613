@@ -21,7 +21,8 @@
 /* DEFINES */
 /*--------------------------------------------------------------------------*/
 
-class Scheduler;
+/* -- (none) -- */
+
 /*--------------------------------------------------------------------------*/
 /* INCLUDES */
 /*--------------------------------------------------------------------------*/
@@ -34,6 +35,7 @@ class Scheduler;
 
 /* -- THREAD FUNCTION (CALLED WHEN THREAD STARTS RUNNING) */
 typedef void (*Thread_Function)();
+
 /*--------------------------------------------------------------------------*/
 /* THREAD CONTROL BLOCK */
 /*--------------------------------------------------------------------------*/
@@ -69,14 +71,8 @@ public:
        NOTE: _stack points to the beginning of the stack area, i.e., to the bottom of the stack.
     */
 
-    ~Thread();
-    /* Destructor thread */
-
     int ThreadId();
     /* Returns the thread id of the thread. */
-
-    char* getStack();
-    /* return the stack pointer for the current thread */
 
     static void dispatch_to(Thread * _thread);
     /* This is the low-level dispatch function that invokes the context switch

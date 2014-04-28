@@ -1,10 +1,8 @@
 /* 
     File: file_system.H
 
-    Author: R. Bettati
-            Department of Computer Science
-            Texas A&M University
-    Date  : 10/04/05
+    Author: Atin Ruia
+    Date  : 28/04/14
 
     Description: File System.
     
@@ -93,10 +91,43 @@ public:
 
 FileSystem::FileSystem(){
     int i;
-    
+
+    storage = new char[SUPERBLOCK_SIZE];        
+
     for(i=0; i<512; i=i+1){
         file_list[i].file_id = -1; // Initialize it to -1 ; file has not created.
     }
+
+}
+
+
+BOOLEAN FileSystem::Mount(SimpleDisk * _disk)
+{ 
+  /* Associates the file system with a disk. We limit ourselves to at most one
+      file system per disk. Returns TRUE if 'Mount' operation successful (i.e. there
+      is indeed a file system on the disk. */
+   char *buffer = storage;
+   //superblock_size = SUPERBLOCK_SIZE;
+   _disk->read(read_block, buffer);
+   struct superblock *sblock = buffer;
+   if(sblock->type != "spec_file_system")
+   {
+      Console::puts("\nUnknown File System!!Not supported!!");
+      return false;
+   }
+   superblock_size = sblock->sblock_size;
+   
+   for(int read_block = 1; i < superblock_size; ++i)   
+   { 
+      buffer +=  sblock-> block_size;
+      _disk->read(read_block, buffer);    
+   }
+}
+
+BOOLEAN FileSystem::Format(SimpleDisk * _disk, unsigned int _size)
+{
+   /* Wipes any file system from the given disk and installs a new, empty, file
+      system that supports up to _size Byte. */
 }
 
 BOOLEAN FileSystem::LookupFile(int _file_id, File *_file){

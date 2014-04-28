@@ -71,7 +71,7 @@ BOOLEAN SimpleDisk::is_ready() {
    return (inportb(0x1F7) & 0x08);
 }
 
-void SimpleDisk::read(unsigned long _block_no, unsigned char * _buf) {
+void SimpleDisk::read(unsigned long _block_no, char * _buf) {
 /* Reads 512 Bytes in the given block of the given disk drive and copies them 
    to the given buffer. No error check! */
 
@@ -89,7 +89,7 @@ void SimpleDisk::read(unsigned long _block_no, unsigned char * _buf) {
   }
 }
 
-void SimpleDisk::write(unsigned long _block_no, unsigned char * _buf) {
+void SimpleDisk::write(unsigned long _block_no, char * _buf) {
 /* Writes 512 Bytes from the buffer to the given block on the given disk drive. */
 
   issue_operation(WRITE, _block_no);
