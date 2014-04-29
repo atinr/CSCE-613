@@ -3,10 +3,12 @@
 class freeList{
 
 private:
-	char vector[Block_Count/8];
+	char *vector;  //[Block_Count/8];
+   int Block_Count;
 
 public:
-	freeList();
+	freeList(char *, int _block_count, bool init);
 	int getBlock();
 	void releaseBlock(int _block_no);
+   bool allocBlock(int _block_no);
 };
