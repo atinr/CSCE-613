@@ -1,4 +1,4 @@
-/* 
+/*
     File: file_system.H
 
     Author: Atin Ruia
@@ -39,6 +39,89 @@ class FileSystem;
 /*--------------------------------------------------------------------------*/
 /* F i l e */
 /*--------------------------------------------------------------------------*/
+
+File::File(int _file_id)
+{
+    file_id = _file_id;
+    
+    // TODO we have to set the file_system pointer
+    
+    if(!file_system->LookupFile(file_id, this)){
+        if(file_system->CreateFile(file_id));
+    }
+    
+    // Add into system wide OFT
+    //Set the curr block and position to first block and 0
+    
+    
+    
+}
+
+unsigned int File::Read(unsigned int _n, char * _buf){
+    unsigned int characters_read = 0;
+    unsigned int no_char;
+    
+    while((_n-characters_read)>0){
+        file_system->disk->read(curr_block, &cached_block);
+        
+       // no of char to read in this block
+        if((curr_position+(_n-characters_read))>511){
+            no_char= 512-curr_position;
+        }
+        else{
+            no_char = _n-characters_read;
+        }
+        for(i=0; i< no_char ; i++){
+            _buf[i]=cached_block[curr_position+i];
+            characters_read = characters_read + 1;
+        }
+        
+        // now current block is read --- fetch a new block if still something is to be read
+        curr_block = curr_block + 1;
+        curr_position = (curr_position + no_char) % 512;
+        
+    }
+    
+    return characters_read;
+    
+}
+
+
+unsigned int File::Write(unsigned int _n, char * _buf){
+    unsigned int characters_read = 0;
+    
+    while((_n-characters_read)>0){
+        file_system->disk->write(curr_block, &cached_block);
+        
+        unsigned int no_char; // no of char to read in this block
+        if((curr_position+(_n-characters_read))>511){
+            no_char= 512-curr_position;
+        }
+        else{
+            no_char = _n-characters_read;
+        }
+        for(i=0; i< no_char ; i++){
+            _buf[i]=cached_block[curr_position+i];
+            characters_read = characters_read + 1;
+        }
+        
+        // now current block is read --- fetch a new block if still something is to be read
+        curr_block = curr_block + 1;
+        curr_position = (curr_position + no_char) % 512;
+        
+    }
+    
+}
+
+void File::Reset(){
+    curr_block = file_list[_file_id]->GetFirstBlock();
+}
+
+
+
+
+
+
 
 class File {
 private: 
@@ -92,11 +175,18 @@ public:
 FileSystem::FileSystem(){
     int i;
 
+<<<<<<< HEAD
     storage = new char[ 512 ];        
+=======
+    storage = new char[SUPERBLOCK_SIZE];
+    
+    FAT * fat_ptr;
+    freeList * freelist_ptr;
+>>>>>>> e61ce38666f676ed4b1b89615432aeb16c24e6ab
 
-    for(i=0; i<512; i=i+1){
-        file_list[i].file_id = -1; // Initialize it to -1 ; file has not created.
-    }
+//    for(i=0; i<512; i=i+1){
+//     file_list[i] = -1; // Initialize it to -1 ; file has not created.
+//    }
 
 }
 
@@ -172,41 +262,48 @@ BOOLEAN FileSystem::Format(SimpleDisk * _disk, unsigned int _size)
 
 BOOLEAN FileSystem::LookupFile(int _file_id, File *_file){
     BOOLEAN found=0;
-    int i;
     
-    for(i=0; i<511; i=i+1){
-        if(file_list[i].file_id == _file_id){
-            found = 1;
-            break;
-        }
+// TODO -- lookup first in system wide table;
+    if(file_list[_file_id]->GetFirstBlock() == -1){
+        found = false;
+    }
+    else{
+        found = true;
     }
     
     if(found){
-        _file = &file_list[i];
-        return found;
-        }
-    else{
-        return found;
+        _file->curr_block = file_list[_file_id].GetFirstBlock();
+        _file->curr_position = 0;
     }
+    
+    return found;
 }
 
 BOOLEAN FileSystem::CreateFile(int _file_id){
     
-    int i;
-    File * _file;
-    BOOLEAN Exist = LookupFile(_file_id, _file);
-    if(Exist){
-        return false;
-    }
-    else{
-        for(i=0; i<511; i=i+1){
-            if(file_list[i].file_id == -1);
-            break;
-        }
-        
-        // Found the next empty spot in directory and i is the index for that
-        file_list[i].file_id = _file_id;
-        // Can not acces the file_id variable... have to define two funtions..set fid and get fid
-        return true;
-    }
+//    int i;
+//    File * _file;
+//    BOOLEAN Exist = LookupFile(_file_id, _file);
+//    if(Exist){
+//        return false;
+//    }
+//    else{
+//        for(i=0; i<511; i=i+1){
+//            if(file_list[i].file_id == -1);
+//            break;
+//        }
+//        
+//        // Found the next empty spot in directory and i is the index for that
+//        file_list[i].file_id = _file_id;
+//        // Can not acces the file_id variable... have to define two funtions..set fid and get fid
+//        return true;
+//    }
+    int first_block;
+    // get a free block from free list
+    first_block = freelist_ptr->getblock();
+    //Once you got the first block then give it to the new file
+    file_list[_file_id]->SetFirstBlock(first_block);
+    
+    // Set the first block of the new file as the last block
+    fat_ptr->SetLastBlock(first_block);
 }

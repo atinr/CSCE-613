@@ -85,6 +85,9 @@ private:
              .. cached block(s)
              .. etc.
       */
+    int curr_block; // To keep track of the current block
+    int curr_position; // To keep track of the bytes within current block
+    char cached_block[512];//keep the read block in a local variable -- cached
 
 public:
 
@@ -130,7 +133,8 @@ private:
      
      SimpleDisk * disk;
      unsigned int size;
-     char* storage;    
+     char* storage;
+    fcb * file_list;
  
 public:
 
