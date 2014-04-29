@@ -6,6 +6,7 @@ fcb::fcb()
 	id = (char *)malloc(20*sizeof(char));
 	owner = (char *)malloc(30*sizeof(char));
 	permissions = (bool *)malloc(10*sizeof(bool));
+    first_block = -1;
 }
 
 char * fcb::getId()
@@ -46,4 +47,12 @@ int fcb::getFileSize()
 void fcb::setFileSize(int size)
 {
 	fileSize = size;
+}
+
+int GetFirstBlock(){
+    return first_block;
+}
+
+void SetFirstBlock(int block){
+    first_block = block;
 }

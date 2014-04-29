@@ -5,6 +5,7 @@ private:
 	char *owner;
 	bool *permissions;
 	int fileSize;
+    int first_block;
 
 public:
 	fcb();
@@ -16,4 +17,6 @@ public:
         void setPermissions(bool *str);
 	int getFileSize();
         void setFileSize(int size);
+    int GetFirstBlock();
+    void SetFirstBlock(int block);
 };
