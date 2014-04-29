@@ -46,7 +46,7 @@ class FAT {
 private:
     
     int no_blocks;
-    int fat[no_blocks];
+    int *fat; //[no_blocks];
     
 public:
     
@@ -55,7 +55,7 @@ public:
     void SetLastBlock(int CurrBlock);
     BOOLEAN isLastBlock(int CurrBlock);
     
-    FAT(int _no_blocks);
+    FAT(int* _fat, int _no_blocks, bool init);
 
 };
 

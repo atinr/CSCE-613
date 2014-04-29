@@ -33,26 +33,34 @@ static unsigned long next_free_frame;
 /* F r a m e   P o o l  */
 /*--------------------------------------------------------------------------*/
 
-FAT::FAT (int _no_blocks){
-    no_blocks = _no_blocks;
-    for(i=0;i<no_blocks;i++){
-        fat[i]=-1; // - 1 means that it is free block; it points to nothing
-    }
+FAT::FAT (int* _fat, int _no_blocks, bool init):no_blocks(_no_blocks), fat(_fat){
+    //no_blocks = _no_blocks;
     
-    void FAT::SetNextBlock(int CurrBlock, int NextBlock){
+   if(init) // init only if set
+   {
     
-        fat[CurrBlock] = NextBlock;
-    }
+      for(i=0;i<no_blocks;i++)
+      {
+            fat[i]=-1; // - 1 means that it is free block; it points to nothing
+      }
+   }
 
-    int GetNextBlock(int CurrBlock){
-        return fat[currBlock];
-    }
-    
-    void SetLastBlock(int CurrBlock){
-        fat[CurrBlock] = 0;
-    }
-    
-    BOOLEAN isLastBlock(int CurrBlock){
-        return (fat[CurrBlock] == 0);
-    }
 }
+    
+void FAT::SetNextBlock(int CurrBlock, int NextBlock){
+    
+   fat[CurrBlock] = NextBlock;
+}
+
+int GetNextBlock(int CurrBlock){
+   return fat[currBlock];
+}
+    
+void SetLastBlock(int CurrBlock){
+    fat[CurrBlock] = 0;
+}
+    
+BOOLEAN isLastBlock(int CurrBlock){
+    return (fat[CurrBlock] == 0);
+}
+
