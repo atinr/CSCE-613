@@ -44,21 +44,24 @@ void operator delete[] (void * p);
 /* DATA STRUCTURES */ 
 /*--------------------------------------------------------------------------*/
 
-struct superblock{
+typedef struct superblock{
 
    char type[20]; //specify the type of filesystem supported   20 bytes
    unsigned int block_size; //                                  4 bytes
    unsigned int no_of_blocks; //                                4 bytes
    unsigned int disk_size; //                                   4 bytes
    unsigned int sblock_size;  //                                4 bytes
-   char pad[28]; //                                            28 bytes
+//   unsigned int freeList_size; //                               4 bytes
+//   unsigned int fat_size; //                                    4 bytes
+//   unsigned int directory_size; //                              4 bytes
+   char pad[28]; //                                            16 bytes
                                                       // total 64 bytes
    char freeList[MAX_BLOCKS / 8 ]; //                 //     2560 bytes -> 5 blocks                
    unsigned int fat[MAX_BLOCKS];                      //    20480 bytes -> 40 blocks
    fcb directory_list[MAX_FILES];                     //      512 bytes
 
 //   fcb fcb_list[MAX_FILES];
-};
+}s_block;
 /*--------------------------------------------------------------------------*/
 /* FORWARD DECLARATIONS */ 
 /*--------------------------------------------------------------------------*/

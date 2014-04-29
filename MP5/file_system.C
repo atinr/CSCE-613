@@ -92,7 +92,7 @@ public:
 FileSystem::FileSystem(){
     int i;
 
-    storage = new char[SUPERBLOCK_SIZE];        
+    storage = new char[ 512 ];        
 
     for(i=0; i<512; i=i+1){
         file_list[i].file_id = -1; // Initialize it to -1 ; file has not created.
@@ -108,26 +108,66 @@ BOOLEAN FileSystem::Mount(SimpleDisk * _disk)
       is indeed a file system on the disk. */
    char *buffer = storage;
    //superblock_size = SUPERBLOCK_SIZE;
-   _disk->read(read_block, buffer);
+   _disk->read(0, buffer);
    struct superblock *sblock = buffer;
    if(sblock->type != "spec_file_system")
    {
       Console::puts("\nUnknown File System!!Not supported!!");
       return false;
    }
-   superblock_size = sblock->sblock_size;
-   
-   for(int read_block = 1; i < superblock_size; ++i)   
+   unsigned int superblock_size = sblock->sblock_size;
+   unsigned int block_size      = sblock->block_size;
+   unsigned int no_of_blocks    = sblock->no_of_blocks;
+   delete storage;
+
+   storage = new char[superblock_size * block_size];
+   buffer = storage;
+   for(int read_block = 0; i < superblock_size; ++i)   
    { 
-      buffer +=  sblock-> block_size;
+      buffer +=  block_size;
       _disk->read(read_block, buffer);    
    }
+   struct superblock *sblock = buffer;
+
+   freeList* flist = new freeList(no_of_blocks, sblock->freeList, false);
+   FAT*      fat   = new FAT(no_of_blocks, sblock->fat, false);
+   directory_list  = sblock->directory_list;
+   //TODO; Check the name of the directory_list pointer
 }
 
 BOOLEAN FileSystem::Format(SimpleDisk * _disk, unsigned int _size)
 {
    /* Wipes any file system from the given disk and installs a new, empty, file
       system that supports up to _size Byte. */
+
+   s_block *sblock = new s_block; //TODO:check this definition
+   sblock->type = "spec_file_system";
+   sblock->block_size = 512;
+   sblock->no_of_blocks = _size/512;
+   if (no_of_blocks % 512 > 0)
+      (sblock->no_of_blocks)++; //                                
+   sblock->disk_size = _size; //                                
+                                                      
+   freeList* flist = new freeList(sblock->freeList, sblock->no_of_blocks, true)                
+   FAT* fat = new FAT(sblock->fat, sblock->no_of_blocks, true)
+   fcb directory_list[MAX_FILES];                     //TODO: Check with Anil on how to initialize the directory
+   
+   int no_of_blocks = sblock->no_of_blocks;
+   sblock->sblock_size = 1 + (no_of_blocks/sizeof(char))/512 + (no_of_blocks*sizeof(int))/512 + ((fcb::size()) * MAX_FILES)/512; 
+   for(int i = 0; i < sblock->sblock_size; ++i)
+   {
+      flist->allocBlock(i);
+   }
+
+   char *buf = sblock;
+   for(int i = 0; i < sblock->sblock_size; ++i)
+   {
+      _disk->write(i, buf);
+      buf += 512;
+   }
+
+   Console::puts("\nDisk Formatted");
+
 }
 
 BOOLEAN FileSystem::LookupFile(int _file_id, File *_file){
