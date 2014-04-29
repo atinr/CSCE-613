@@ -23,7 +23,8 @@ int freeList::getBlock()
 			{
 				if(((vector[i]>>( 7 - j )) & 1) == 0 )
 				{
-					return 8 * i  +  j + 1;
+					vector[i] |= 1 << (7-j);
+                    return (8 * i  +  j) ; // Starting from block count 0
 				}
 			}
 		}
@@ -33,11 +34,12 @@ int freeList::getBlock()
 
 void freeList::releaseBlock(int _block_no)
 {
-	vector[(_block_no - 1)/8] = vector[(_block_no - 1)/8]|(1<<(7-((_block_no-1)%8)));
+	vector[(_block_no)/8] = vector[(_block_no)/8] & (~(1<<(7-((_block_no)%8)))); // Again counting blocks from 0
 	return;
 }
 
-bool freeList::allocBlock(int _block_no)
+void freeList::allocBlock(int _block_no)
 {
-   
+ vector[(_block_no)/8] = vector[(_block_no)/8] | ((1<<(7-((_block_no)%8))));
+    return;
 }
