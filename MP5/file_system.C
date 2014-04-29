@@ -175,14 +175,11 @@ public:
 FileSystem::FileSystem(){
     int i;
 
-<<<<<<< HEAD
     storage = new char[ 512 ];        
-=======
     storage = new char[SUPERBLOCK_SIZE];
     
     FAT * fat_ptr;
     freeList * freelist_ptr;
->>>>>>> e61ce38666f676ed4b1b89615432aeb16c24e6ab
 
 //    for(i=0; i<512; i=i+1){
 //     file_list[i] = -1; // Initialize it to -1 ; file has not created.
