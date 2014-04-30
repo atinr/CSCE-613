@@ -69,6 +69,23 @@ threads_low.o: threads_low.asm threads_low.H
 thread.o: thread.C thread.H threads_low.H
 	$(CPP) $(CPP_OPTIONS) -c -o thread.o thread.C
 
+# ==== FILE_SYSTEM =====
+
+fcb.o: fcb.C fcb.H
+	$(CPP) $(CPP_OPTIONS) -c -o fcb.o fcb.C
+
+file_system.o: file_system.C file_system.H fcb.H freeList.H fat.H tables.H
+	$(CPP) $(CPP_OPTIONS) -c -o file_system.o file_system.C
+
+freeList.o: freeList.C freeList.H
+	$(CPP) $(CPP_OPTIONS) -c -o freeList.o freeList.C
+
+fat.o: fat.C fat.H
+	$(CPP) $(CPP_OPTIONS) -c -o fat.o fat.C
+
+tables.o: tables.C tables.H
+	$(CPP) $(CPP_OPTIONS) -c -o tables.o tables.C
+
 # ==== SCHEDULER ====
 
 Scheduler.o: Scheduler.C Scheduler.H
@@ -80,8 +97,8 @@ kernel.o: kernel.C console.H simple_timer.H
 	$(CPP) $(CPP_OPTIONS) -c -o kernel.o kernel.C
 
 kernel.bin: start.o utils.o kernel.o assert.o console.o gdt.o idt.o irq.o machine.o exceptions.o interrupts.o \
-   simple_timer.o simple_disk.o frame_pool.o threads_low.o thread.o blocking_disk.o Scheduler.o mem_pool.o
+   simple_timer.o simple_disk.o frame_pool.o threads_low.o thread.o blocking_disk.o Scheduler.o mem_pool.o fcb.o freeList.o fat.o tables.o file_system.o
 	ld -melf_i386 -T linker.ld -o kernel.bin start.o utils.o kernel.o assert.o console.o gdt.o idt.o \
    exceptions.o irq.o machine.o interrupts.o simple_timer.o simple_disk.o frame_pool.o threads_low.o thread.o \
-   blocking_disk.o Scheduler.o mem_pool.o
+   blocking_disk.o Scheduler.o mem_pool.o fcb.o freeList.o fat.o tables.o file_system.o
 	

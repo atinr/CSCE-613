@@ -39,7 +39,7 @@ FAT::FAT (int* _fat, int _no_blocks, bool init):no_blocks(_no_blocks), fat(_fat)
    if(init) // init only if set
    {
     
-      for(i=0;i<no_blocks;i++)
+      for(int i=0;i<no_blocks;i++)
       {
             fat[i]=-1; // - 1 means that it is free block; it points to nothing
       }
@@ -53,7 +53,7 @@ void FAT::SetNextBlock(int CurrBlock, int NextBlock){
 }
 
 int FAT::GetNextBlock(int CurrBlock){
-   return fat[currBlock];
+   return fat[CurrBlock];
 }
     
 void FAT::SetLastBlock(int CurrBlock){

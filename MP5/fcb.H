@@ -1,3 +1,4 @@
+#include "utils.H"
 
 struct fcb_data{
 	int file_id;
@@ -18,7 +19,7 @@ private:
 
 public:
 	fcb(int _file_id);
-    fcb(struct fcb_data);
+//   fcb(struct fcb_data);
 	int getId();
 	void setId(int _file_id);
 	char * getOwner();
@@ -31,6 +32,6 @@ public:
     void SetFirstBlock(int block);
     static int getFCBSize();
     
-    struct fcb_data getFCBData();
-    void SetfcbData(struct fcb_data* new_data);
+//    struct fcb_data getFCBData();
+//    void SetfcbData(struct fcb_data* new_data);
 };

@@ -1,6 +1,5 @@
-#include "Console.H"
+#include "console.H"
 #include "utils.H"
-#include "fcb.H"
 
 class File;
 

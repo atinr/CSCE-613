@@ -5,8 +5,6 @@
 //  Created by Anil Alagiya on 4/29/14.
 //
 //
-
-#include <stdio.h>
 #include "tables.H"
 #include "file_system.H"
 
@@ -24,11 +22,11 @@ void insert_system_wide_table(File* newFile)
     }
 }
 
-void delete_system_wide_table(File* newFile)
+void delete_system_wide_table(File* file)
 {
     for(int i = 0; i<MAX_OPEN_FILES ;++i)
     {
-        if(system_wide_table[i] != NULL && system_wide_table[i]->getFileID() == _file_id)
+        if(system_wide_table[i] != NULL && system_wide_table[i] == file)
         {
             delete system_wide_table[i];
             system_wide_table[i] = NULL;
@@ -39,7 +37,7 @@ void delete_system_wide_table(File* newFile)
     Console::puts("\n No entry with the given file_id present in the table");
 }
 
-File* lookup_system_wide_table(int file_id)
+File* lookup_system_wide_table(int _file_id)
 {
     for(int i = 0; i<MAX_OPEN_FILES ;++i)
     {

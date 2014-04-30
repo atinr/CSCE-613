@@ -40,12 +40,12 @@ class FileSystem;
 /* F i l e */
 /*--------------------------------------------------------------------------*/
 
-File::File(int _file_id)
+File::File(int _file_id, FileSystem *_fileSystem)
 {
     file_id = _file_id;
     curr_position = 0;
-    file_size = file_list[_file_id].fileSize;
-
+    file_system = _fileSystem;
+    file_size = file_system->file_list[_file_id].fileSize;
     
     // TODO we have to set the file_system pointer
     
@@ -79,14 +79,14 @@ unsigned int File::Read(unsigned int _n, char * _buf){
         else{
             no_char = _n-characters_read;
         }
-        for(i=0; i< no_char ; i++){
+        for(int i=0; i< no_char ; i++){
             _buf[i]=cached_block[curr_position+i];
             characters_read = characters_read + 1;
         }
         
         // now current block is read --- fetch a new block if still something is to be read
         if(end_of_block){
-            curr_block = fat_ptr->GetNextBlock(curr_Block);
+            curr_block = file_system->fat_ptr->GetNextBlock(curr_block);
             curr_position = 0;
         }
         else{
@@ -117,21 +117,21 @@ unsigned int File::Write(unsigned int _n, char * _buf){
         else{
             no_char = _n-characters_write;
         }
-        for(i=0; i< no_char ; i++){
+        for(int i=0; i< no_char ; i++){
             _buf[i]=cached_block[curr_position+i];
             characters_write = characters_write + 1;
         }
         
         // now current block is write --- fetch a new block if still something is to be write
         if(end_of_block){
-            if(fat_ptr->isLastBlock(curr_block)){
-                int next_block= freelist_ptr->getBlock();
-                fat_ptr->SetNextBlock(curr_block, next_block);
+            if(file_system->fat_ptr->isLastBlock(curr_block)){
+                int next_block= file_system->freelist_ptr->getBlock();
+                file_system->fat_ptr->SetNextBlock(curr_block, next_block);
                 curr_block = next_block;
 
             }
             else{
-                curr_block = fat_ptr->GetNextBlock(curr_block);
+                curr_block = file_system->fat_ptr->GetNextBlock(curr_block);
                 }
             
             curr_position = 0;
@@ -147,29 +147,29 @@ unsigned int File::Write(unsigned int _n, char * _buf){
 }
 
 void File::Reset(){
-    curr_block = file_list[_file_id].first_block;
+    curr_block = file_system->file_list[file_id].first_block;
     curr_position=0;
 }
 
 void File::Rewrite(){
-    curr_block = file_list[_file_id].first_block;
-    while(!fat_ptr->isLastBlock(curr_block))
+    curr_block = file_system->file_list[file_id].first_block;
+    while(!file_system->fat_ptr->isLastBlock(curr_block))
     {
-        int next_block = fat_ptr->GetNextBlock(curr_block);
-        fat_ptr->freeBlock(curr_block);
-        freelist_ptr->releaseBlock(curr_block);
+        int next_block = file_system->fat_ptr->GetNextBlock(curr_block);
+        file_system->fat_ptr->freeBlock(curr_block);
+        file_system->freelist_ptr->releaseBlock(curr_block);
         curr_block = next_block;
     }
-    fat_ptr->freeBlock(curr_block);
-    freelist_ptr->releaseBlock(curr_block);
-    file_list[_file_id].first_block = freelist_ptr->getBlock();
-    curr_block = file_list[_file_id].first_block;
-    fat_ptr->SetLastBlock(curr_block);
+    file_system->fat_ptr->freeBlock(curr_block);
+    file_system->freelist_ptr->releaseBlock(curr_block);
+    file_system->file_list[file_id].first_block = file_system->freelist_ptr->getBlock();
+    curr_block = file_system->file_list[file_id].first_block;
+    file_system->fat_ptr->SetLastBlock(curr_block);
     curr_position = 0;
 }
 
 BOOLEAN File::EoF(){
-    if(fat_ptr->isLastBlock(curr_block)){
+    if(file_system->fat_ptr->isLastBlock(curr_block)){
         if((file_size % 512 ) == curr_position){
             return true;
         }
@@ -220,7 +220,7 @@ BOOLEAN FileSystem::Mount(SimpleDisk * _disk)
 
    storage = new char[superblock_size * block_size];
    buffer = storage;
-   for(int read_block = 0; i < superblock_size; ++i)   
+   for(int read_block = 0; read_block < superblock_size; ++read_block)   
    { 
       buffer +=  block_size;
       _disk->read(read_block, buffer);    
@@ -228,8 +228,8 @@ BOOLEAN FileSystem::Mount(SimpleDisk * _disk)
    
    sblock = (struct superblock *)storage;
 
-   freelist_ptr = new freeList(no_of_blocks, sblock->freeList, false);
-   fat_ptr   = new FAT(no_of_blocks, sblock->fat, false);
+   freelist_ptr = new freeList(sblock->freeList, no_of_blocks, false);
+   fat_ptr   = new FAT(sblock->fat, no_of_blocks, false);
    file_list  = sblock->directory_list;
    //TODO; Check the name of the directory_list pointer
 }
@@ -240,18 +240,19 @@ BOOLEAN FileSystem::Format(SimpleDisk * _disk, unsigned int _size)
       system that supports up to _size Byte. */
 
    s_block *sblock = new s_block; //TODO:check this definition
-   sblock->type = "spec_file_system";
+   char *c = "spec_file_system";
+   memcpy(sblock->type, c, 17);
    sblock->block_size = 512;
    sblock->no_of_blocks = _size/512;
    if (_size % 512 > 0)
       (sblock->no_of_blocks)++; //                                
    sblock->disk_size = _size; //                                
                                                       
-   freelist_ptr = new freeList(sblock->freeList, sblock->no_of_blocks, true)
-   fat_ptr = new FAT(sblock->fat, sblock->no_of_blocks, true)
+   freeList* freelist_ptr = new freeList(sblock->freeList, sblock->no_of_blocks, true);
+   FAT* fat_ptr = new FAT(sblock->fat, sblock->no_of_blocks, true);
    //fcb directory_list[MAX_FILES];                     //TODO: Check with Anil on how to initialize the directory
     struct fcb_data directory_list[MAX_FILES];
-    for(i=0; i<MAX_FILES; i++){
+    for(int i=0; i<MAX_FILES; i++){
         directory_list[i].file_id = i;
         directory_list[i].first_block = -1;
     }
@@ -264,7 +265,7 @@ BOOLEAN FileSystem::Format(SimpleDisk * _disk, unsigned int _size)
        fat_ptr->SetLastBlock(i);
    }
 
-   char *buf = sblock;
+   char *buf = (char *)sblock;
    for(int i = 0; i < sblock->sblock_size; ++i)
    {
       _disk->write(i, buf);
@@ -293,8 +294,8 @@ BOOLEAN FileSystem::LookupFile(int _file_id, File **_file){
     }
     
     if(found){
-        *_file->curr_block = file_list[_file_id].first_block;
-        *_file->curr_position = 0;
+        (*_file)->curr_block = file_list[_file_id].first_block;
+        (*_file)->curr_position = 0;
         insert_system_wide_table(*_file);
     }
     
@@ -333,8 +334,8 @@ BOOLEAN FileSystem::CreateFile(int _file_id){
     
     // Add this file to system wide OFT
         file_list[_file_id].fileSize = 0;
-        File * newFile = new File(_file_id);
-        new_file->curr_block = first_block;
+        File * newFile = new File(_file_id, this);
+        newFile->curr_block = first_block;
         insert_system_wide_table(newFile);
         
         return true;

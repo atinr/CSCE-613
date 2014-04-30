@@ -1,4 +1,3 @@
-#include<stdlib.h>
 #include "fcb.H"
 
 fcb::fcb(int _file_id)
@@ -10,14 +9,14 @@ fcb::fcb(int _file_id)
     first_block = -1;
 }
 
-fcb::fcb(struct fcb_data* data)
+/*fcb::fcb(struct fcb_data* data)
 {
     file_id = data->file_id;
     owner = data->owner;
     permissions = data->permissions;
     fileSize = data->fileSize;
     first_block = data->first_block;
-}
+}*/
 
 int fcb::getId()
 {
@@ -72,7 +71,7 @@ int fcb::getFCBSize(){
     //TO DO ;
 }
 
-struct fcb_data getFCBData(){
+/*struct fcb_data getFCBData(){
     struct fcb_data data;
     data.file_id = file_id;
     memcpy(data.owner, owner, 20);
@@ -82,3 +81,4 @@ struct fcb_data getFCBData(){
     
 }
 void SetfcbData(struct fcb_data* new_data);
+*/
