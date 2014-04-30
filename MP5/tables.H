@@ -1,13 +1,16 @@
 #include "Console.H"
 #include "utils.H"
+#include "fcb.H"
+
+class File;
 
 #define MAX_OPEN_FILES 20
 
-struct open_inode{
+/*struct open_inode{
    
    int file_id;
-   fcb* curr_fcb;
-   char* curr_ptr;
+   struct fcb_data curr_fcb;
+   int curr_ptr;
    int open_counter;
    int curr_disk_block;
 };
@@ -63,6 +66,9 @@ void delete_system_wide_table(int _file_id)
 
    Console::puts("\n No entry with the given file_id present in the table");
 }
+*/
 
-
-
+void insert_system_wide_table(File* newFile);
+void delete_system_wide_table(File* newFile);
+File* lookup_system_wide_table(int file_id);
+void init_system_wide_table();

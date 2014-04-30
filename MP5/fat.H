@@ -56,6 +56,7 @@ public:
     BOOLEAN isLastBlock(int CurrBlock);
     
     FAT(int* _fat, int _no_blocks, bool init);
+    void freeBlock(int CurrBlock);
 
 };
 

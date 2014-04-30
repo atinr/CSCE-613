@@ -39,7 +39,10 @@ void operator delete[] (void * p);
 
 #include "utils.H"
 #include "simple_disk.H"
-
+#include "fcb.H"
+#include "freeList.H"
+#include "fat.H"
+#include "tables.H"
 /*--------------------------------------------------------------------------*/
 /* DATA STRUCTURES */ 
 /*--------------------------------------------------------------------------*/
@@ -57,8 +60,8 @@ typedef struct superblock{
    char pad[28]; //                                            16 bytes
                                                       // total 64 bytes
    char freeList[MAX_BLOCKS / 8 ]; //                 //     2560 bytes -> 5 blocks                
-   unsigned int fat[MAX_BLOCKS];                      //    20480 bytes -> 40 blocks
-   fcb directory_list[MAX_FILES];                     //      512 bytes
+   int fat[MAX_BLOCKS];                      //    20480 bytes -> 40 blocks
+   struct fcb_data directory_list[MAX_FILES];                     //      512 bytes
 
 //   fcb fcb_list[MAX_FILES];
 }s_block;
@@ -79,17 +82,18 @@ private:
      FileSystem   * file_system;
 
      unsigned int   file_id;
+    
+    int file_size;
 
      /* -- You may want to store other information, such as 
              .. position in the file
              .. cached block(s)
              .. etc.
       */
+public:
     int curr_block; // To keep track of the current block
     int curr_position; // To keep track of the bytes within current block
     char cached_block[512];//keep the read block in a local variable -- cached
-
-public:
 
     File();
     /* Constructor for the file handle. Set the 'current
@@ -116,6 +120,8 @@ public:
 
     BOOLEAN EoF();
     /* Is the current location for the file at the end of the file? */
+    
+    int getFileID();
 
 
 };
@@ -134,7 +140,9 @@ private:
      SimpleDisk * disk;
      unsigned int size;
      char* storage;
-    fcb * file_list;
+    struct fcb_data * file_list;
+    FAT * fat_ptr;
+    freeList * freelist_ptr;
  
 public:
 

@@ -52,15 +52,19 @@ void FAT::SetNextBlock(int CurrBlock, int NextBlock){
    fat[CurrBlock] = NextBlock;
 }
 
-int GetNextBlock(int CurrBlock){
+int FAT::GetNextBlock(int CurrBlock){
    return fat[currBlock];
 }
     
-void SetLastBlock(int CurrBlock){
+void FAT::SetLastBlock(int CurrBlock){
     fat[CurrBlock] = 0;
 }
     
-BOOLEAN isLastBlock(int CurrBlock){
+BOOLEAN FAT::isLastBlock(int CurrBlock){
     return (fat[CurrBlock] == 0);
+}
+
+void FAT::freeBlock(int currBlock){
+    fat[currBlock]= -1;
 }
 
